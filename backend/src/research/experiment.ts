@@ -63,9 +63,22 @@ export function markFaultReached(id: FaultId, where: string, layer: "backend" | 
   fs.appendFileSync(experiment.reachLog, line + "\n", "utf8");
 }
 
+export interface ResearchHooks {
+  /** Restore the deterministic seed data (called before every harness execution). */
+  onReset?: () => void;
+}
+
 /** Harness-only endpoints. Mounted only when STUDYFLOW_RESEARCH_API=1. */
-export function researchRouter(): Router {
+export function researchRouter(hooks: ResearchHooks = {}): Router {
   const router = Router();
+  router.post("/reset", (_req, res) => {
+    if (!hooks.onReset) {
+      res.status(501).json({ error: "reset not available" });
+      return;
+    }
+    hooks.onReset();
+    res.status(204).end();
+  });
   router.get("/info", (_req, res) => {
     res.json({ variant: experiment.variant, fault: experiment.fault, reachLogEnabled: Boolean(experiment.reachLog) });
   });

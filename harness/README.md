@@ -21,17 +21,26 @@ cd tests; npm install; npx playwright install chromium; cd ..
 - 지금 쓰는 Python 3.9는 지원이 끝난 버전입니다. 본 실험 전에 Python 3.12 이상과 venv 환경으로 옮기는 걸 권장합니다.
 
 ## 실행
+전체 순서는 [`docs/RUNNING.md`](../docs/RUNNING.md)를 따르세요. 요약하면 다음과 같습니다.
 ```powershell
-# 1) 앱 실행 (터미널 2개)
-cd backend;  $env:STUDYFLOW_RESEARCH_API="1"; npm run dev
-cd frontend; npm run dev
+# 1) 앱 실행: 시나리오와 같은 변형, 결함 none (터미널 2개, 각 폴더 안에서)
+#    backend : $env:STUDYFLOW_RESEARCH_API="1"; $env:STUDYFLOW_VARIANT="B"; $env:STUDYFLOW_FAULT="none"; npm run dev
+#    frontend: $env:VITE_STUDYFLOW_VARIANT="B"; $env:VITE_STUDYFLOW_FAULT="none"; npm run dev
 
 # 2) 판정기 자체 점검 (무료)
 python harness/selftest_labels.py
 
 # 3) 생성 + 정상 앱 검증 (StudyFlow 루트에서)
-python harness/generate.py --scenario research/scenarios/SMOKE-001.json --reps 3
+python harness/generate.py --scenario research/scenarios/G2-B.json --reps 3
 ```
+
+**자동 사전 점검**
+- 연구용 API가 꺼져 있으면 중단합니다.
+- 결함이 켜진 앱이면 중단합니다.
+- 시나리오의 변형과 앱의 변형이 다르면 중단합니다.
+- 통과하면, snapshot 캡처 전과 Playwright 실행 전마다 DB를 seed 상태로 초기화합니다.
+
+연구용 API가 없는 앱에서만 `--no-reset`을 쓰세요. `SMOKE-*` 시나리오는 Vite 기본 화면(commit `d6eb633`)이 대상이라 현재 앱에서는 쓰지 않습니다.
 
 ## 결과 위치: `research/llm-results/runs/<run_id>/`
 | 파일 | 내용 |

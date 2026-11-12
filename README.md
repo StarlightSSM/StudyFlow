@@ -16,7 +16,7 @@
 
 같은 핵심 기능을 가진 네 가지 앱 변형(A–D)에서 **상태 의존성**과 **페이지 간 상호작용**만 다르게 하고, 통제된 결함(F1–F7)을 주입합니다. 그런 다음 LLM 생성 테스트의 결함 탐지율과 실패 메커니즘(미탐지, 오라클 오류, 실행 실패)을 비교합니다.
 
-> **현재 상태:** 요구사항 명세와 실험 프로토콜 초안 작성, 실험 하네스 Stage 1(생성과 정상 앱 검증)을 구현했습니다. 앱 기능과 결함 구현을 진행할 예정입니다.
+> **현재 상태:** 실험 하네스 Stage 1을 구현했습니다. 과제 목록과 완료 처리(G2)를 변형 A·B로 구현했고, 결함 F1은 기준 테스트로 검증했습니다. 다른 목표, 변형 C·D, 나머지 결함, 로그인은 순차적으로 진행할 예정입니다.
 
 ## 2. 연구 질문
 
@@ -95,6 +95,7 @@ StudyFlow/
 ├── tests/                     Playwright
 │   ├── playwright.config.ts   실험용 고정 실행 환경
 │   ├── tools/snapshot.mjs     LLM에 보여줄 ARIA snapshot + DOM 공변량
+│   ├── reference/             결함별 사람 작성 기준 테스트 (결함 유효성 검증용)
 │   └── llm-generated/         실행용 복사본 (git 제외)
 ├── harness/                   실험 하네스 (생성·검증·평가)
 ├── research/
@@ -102,14 +103,17 @@ StudyFlow/
 │   ├── design/conditions.md   앱 변형(A–D) 설계
 │   ├── faults/catalog.yaml    결함 카탈로그 (F1–F7)
 │   ├── scenarios/             테스트 목표 × 변형 시나리오 정의
-│   ├── test-cases/            결함별 사람 작성 기준 테스트 (결함 유효성 검증용)
 │   ├── llm-results/runs/      실행별 원자료 (호출, 실행, 스위트 기록, 생성 코드)
 │   └── evaluation/            Stage 2 판정 결과, 분석 데이터셋
-├── docs/research/PROTOCOL.md  실험 프로토콜 (판정 규칙·분석 계획 사전 확정)
+├── docs/
+│   ├── RUNNING.md             전체 실행 매뉴얼
+│   └── research/PROTOCOL.md   실험 프로토콜 (판정 규칙·분석 계획 사전 확정)
 └── README.md
 ```
 
 ## 6. 시작하기
+
+> **실행 매뉴얼:** 전체 순서는 [`docs/RUNNING.md`](docs/RUNNING.md)에 있습니다. 구성요소별 매뉴얼은 [`frontend/README.md`](frontend/README.md), [`backend/README.md`](backend/README.md), [`harness/README.md`](harness/README.md)에 있습니다.
 
 ### 사전 준비
 - Node.js 및 npm, Python 3.9 이상(3.12 권장), Git
@@ -166,9 +170,11 @@ python harness/generate.py --scenario research/scenarios/SMOKE-001.json --reps 3
 - [x] 실험 스위치(변형·결함·도달 기록) 골격
 - [x] 실험 하네스 Stage 1 (생성, 정상 앱 검증, 수정 루프, flaky 판정, 기록)
 - [ ] 지도교수 승인 → 프로토콜 v1.0 확정
-- [ ] 백엔드 및 SQLite 데이터베이스, seed data 구현
-- [ ] 인증·과목·과제·필터·대시보드 기능을 변형 A–D로 구현
-- [ ] 결함 F1–F7 구현 및 결함별 기준 테스트 작성
+- [x] 백엔드 SQLite(`node:sqlite`) 데이터베이스와 고정 seed data(`seed-v1`), 하네스용 DB 초기화
+- [x] G2(과제 완료 처리): 과제 목록·상태 필터·완료 처리를 변형 A·B로 구현
+- [x] 결함 F1(변형 B) 구현 및 기준 테스트 검증
+- [ ] 나머지 목표(G1·G3–G5)와 변형 C·D 구현, 로그인(REQ-AUTH)
+- [ ] 결함 F2–F7 구현 및 결함별 기준 테스트 작성
 - [ ] 하네스 Stage 2 (결함 앱 평가, 도달 기반 판정)
 - [ ] 파일럿 (목표 수 결정, 라벨 일치도 κ 확인)
 - [ ] 본 실험 및 혼합효과 모형 분석
@@ -244,6 +250,8 @@ See the Korean section §5. Key locations:
 - `research/llm-results/runs/`: raw run data
 
 ## 6. Getting Started
+
+The full run manual (in Korean) is [`docs/RUNNING.md`](docs/RUNNING.md). Component manuals live in `frontend/`, `backend/`, and `harness/` README files.
 
 ```bash
 cd backend && npm install && npm run dev      # :3000

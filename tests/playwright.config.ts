@@ -1,9 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Fixed execution environment for the experiment (PROTOCOL.md §실행 환경).
+// Fixed execution environment for the experiment (PROTOCOL.md §5).
 // The harness sets BASE_URL and PW_OUTPUT_DIR per run.
+//   llm-generated/  LLM-generated suites (execution copies, git-ignored)
+//   reference/      human-written reference tests, one per fault (fault validity, PROTOCOL.md §7)
 export default defineConfig({
-  testDir: './llm-generated',
+  testDir: '.',
+  testMatch: ['llm-generated/**/*.spec.ts', 'reference/**/*.spec.ts'],
   fullyParallel: false,
   workers: 1,
   retries: 0, // flakiness is measured explicitly by the harness, never hidden by retries

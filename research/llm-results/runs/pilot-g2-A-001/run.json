@@ -1,0 +1,44 @@
+{
+  "run_id": "pilot-g2-A-001",
+  "started_at": "2026-11-12T16:41:23+09:00",
+  "harness_version": "0.1.0",
+  "note": "first real scenario, variant A",
+  "provider": "gemini",
+  "model": "gemini-3.6-flash",
+  "sampling": "provider defaults (not overridden)",
+  "params": {
+    "reps": 2,
+    "max_repairs": 3,
+    "flaky_reruns": 2,
+    "base_url": "http://localhost:5173",
+    "min_interval": 6.0
+  },
+  "prompts": {
+    "generate_v1": "e7da001d9d47c39985ae7e61beb0a246b0a60ba28cee7dc2145dd0c35a128b57",
+    "repair_v1": "2321890809721e319f227347a5b4ac8c7f0fa7d7d63e4cd7e830fdfdaec6c2f6"
+  },
+  "app": {
+    "git_commit": "673cb86d04f9d922706c6d793975b90b2d934023",
+    "git_dirty": true,
+    "research_info": {
+      "variant": "A",
+      "fault": null,
+      "reachLogEnabled": false
+    },
+    "db_reset_before_each_execution": true
+  },
+  "versions": {
+    "python": "3.9.2",
+    "node": "v22.21.1",
+    "playwright": "Version 1.63.0",
+    "google-genai": "1.47.0",
+    "os": "Windows-10-10.0.26100-SP0"
+  },
+  "scenarios": [
+    "G2-A"
+  ],
+  "model_versions_seen": [
+    "gemini-3.6-flash"
+  ],
+  "finished_at": "2026-11-12T16:43:42+09:00"
+}
