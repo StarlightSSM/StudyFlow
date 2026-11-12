@@ -6,7 +6,8 @@
 # - primary_analysis: true = 4변형 공통 → H1–H3 주분석에 사용 (조건과 결함유형의 교락 방지)
 # - goal / requirement_ids: 탐지 기회를 제공하는 테스트 목표 (research/design/conditions.md)
 # - layer / reach_marker: 결함 코드 위치와 도달 기록 지점 (구현 시 채움)
-# - reference_test: 사람이 작성한 기준 테스트 경로 — 이 테스트가 결함을 잡지 못하면 본 실험에서 제외
+# - reference_test: 사람이 작성한 기준 테스트 경로 (tests/reference/) — 이 테스트가 결함을 잡지 못하면 본 실험에서 제외
+# - status: implemented 가 아닌 결함은 아직 코드에 없음
 #
 # 이 파일은 LLM 입력에 절대 포함하지 않는다.
 
@@ -20,8 +21,11 @@ faults:
     goal: G2
     requirement_ids: [REQ-STATUS-001, REQ-NFR-001]
     layer: frontend
-    reach_marker: null
-    reference_test: null
+    status: implemented   # 2026-11-12
+    code: frontend/src/store/tasks.ts (setStatus)
+    reach_marker: tasksStore.setStatus.refreshSummary
+    reference_test: tests/reference/F1.spec.ts
+    validation: "2026-11-12 — B+none 3/3 pass; B+F1 fail ('완료 5' 기대, '완료 4' 수신) + reach 기록 확인"
 
   - id: F2
     name: 필터 조건 반전

@@ -790,7 +790,7 @@ G2-B_r1  (생성 반복 1, research/llm-results/runs/<run_id>/)
 F1  (research/faults/catalog.yaml)
 ```
 
-각 결함에는 사람이 작성한 **기준 테스트(reference test)**를 두어, 결함이 관찰 가능함을 사전에 확인한다 (`research/test-cases/`).
+각 결함에는 사람이 작성한 **기준 테스트(reference test)**를 두어, 결함이 관찰 가능함을 사전에 확인한다 (`tests/reference/`).
 
 ↓
 
