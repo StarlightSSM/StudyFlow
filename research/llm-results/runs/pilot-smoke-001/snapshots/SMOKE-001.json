@@ -1,0 +1,9 @@
+{
+  "url": "http://localhost:5173/",
+  "title": "frontend",
+  "aria": "- img \"React logo\"\n- img \"Vite logo\"\n- heading \"Get started\" [level=1]\n- paragraph:\n  - text: Edit\n  - code: src/App.tsx\n  - text: and save to test\n  - code: HMR\n- button \"Count is 0\"\n- heading \"Documentation\" [level=2]\n- paragraph: Your questions, answered\n- list:\n  - listitem:\n    - link \"Explore Vite\":\n      - /url: https://vite.dev/\n  - listitem:\n    - link \"Learn more\":\n      - /url: https://react.dev/\n- heading \"Connect with us\" [level=2]\n- paragraph: Join the Vite community\n- list:\n  - listitem:\n    - link \"GitHub\":\n      - /url: https://github.com/vitejs/vite\n  - listitem:\n    - link \"Discord\":\n      - /url: https://chat.vite.dev/\n  - listitem:\n    - link \"X.com\":\n      - /url: https://x.com/vite_js\n  - listitem:\n    - link \"Bluesky\":\n      - /url: https://bsky.app/profile/vite.dev",
+  "stats": {
+    "domNodes": 61,
+    "interactiveElements": 7
+  }
+}
