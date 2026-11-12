@@ -26,3 +26,15 @@ playwright-report/
 # database
 *.db
 *.sqlite
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# experiment: execution copies of generated tests (canonical copies live in research/llm-results/runs/*/specs/)
+tests/llm-generated/
+# experiment: large Playwright artifacts (trace/video/screenshots)
+research/llm-results/runs/*/pw-artifacts/
+# experiment: fault reach logs are regenerated per evaluation run
+research/evaluation/**/reach*.jsonl

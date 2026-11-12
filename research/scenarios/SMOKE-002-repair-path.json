@@ -1,0 +1,10 @@
+{
+  "scenario_id": "SMOKE-002",
+  "condition": "SMOKE",
+  "variant": null,
+  "requirement_ids": [],
+  "start_path": "/",
+  "goal": "카운터 버튼을 클릭하면 표시가 바뀌는지 검증한다.",
+  "spec": "시작 페이지의 카운터 버튼에는 처음에 정확히 'Clicks: 1'이 표시된다. 버튼을 한 번 클릭하면 정확히 'Clicks: 2'가 표시된다.",
+  "notes": "수정(repair) 경로 점검용 스모크 시나리오. 명세가 실제 앱('Count is 0')과 의도적으로 다르다. 본 실험 데이터에 포함하지 않는다."
+}

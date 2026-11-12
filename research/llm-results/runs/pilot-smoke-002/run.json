@@ -1,0 +1,39 @@
+{
+  "run_id": "pilot-smoke-002",
+  "started_at": "2026-11-12T12:47:39+09:00",
+  "harness_version": "0.1.0",
+  "note": "repair-path check with deliberately wrong spec",
+  "provider": "gemini",
+  "model": "gemini-3.6-flash",
+  "sampling": "provider defaults (not overridden)",
+  "params": {
+    "reps": 1,
+    "max_repairs": 3,
+    "flaky_reruns": 1,
+    "base_url": "http://localhost:5173",
+    "min_interval": 6.0
+  },
+  "prompts": {
+    "generate_v1": "e7da001d9d47c39985ae7e61beb0a246b0a60ba28cee7dc2145dd0c35a128b57",
+    "repair_v1": "2321890809721e319f227347a5b4ac8c7f0fa7d7d63e4cd7e830fdfdaec6c2f6"
+  },
+  "app": {
+    "git_commit": "d6eb63368403836db7a63629169a1c94eb3f6103",
+    "git_dirty": false,
+    "research_info": null
+  },
+  "versions": {
+    "python": "3.9.2",
+    "node": "v22.21.1",
+    "playwright": "Version 1.63.0",
+    "google-genai": "1.47.0",
+    "os": "Windows-10-10.0.26100-SP0"
+  },
+  "scenarios": [
+    "SMOKE-002"
+  ],
+  "model_versions_seen": [
+    "gemini-3.6-flash"
+  ],
+  "finished_at": "2026-11-12T12:48:35+09:00"
+}
