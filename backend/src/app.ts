@@ -1,4 +1,5 @@
 import express from "express";
+import { experiment, researchRouter } from "./research/experiment.js";
 
 const app = express();
 
@@ -10,5 +11,11 @@ app.get("/api/health", (_req, res) => {
     message: "StudyFlow backend is running",
   });
 });
+
+// Experiment control endpoints for the harness only (never linked from the UI).
+if (process.env.STUDYFLOW_RESEARCH_API === "1") {
+  app.use("/api/__research", researchRouter());
+  console.log(`[research] variant=${experiment.variant} fault=${experiment.fault ?? "none"}`);
+}
 
 export default app;
