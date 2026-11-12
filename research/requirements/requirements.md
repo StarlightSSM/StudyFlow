@@ -5,9 +5,10 @@
 | 항목 | 내용 |
 |---|---|
 | Project | StudyFlow |
-| Version | v1.0 |
+| Version | v2.0 (2026-11-12: 연구 실험 조건 변경 → Major. 기능 요구사항(4–11장)은 변경 없음, 12·15·19장 연구 관련 부분만 개정) |
 | Purpose | 학생의 과목 및 과제를 관리하는 다중 사용자 웹 애플리케이션 |
-| Primary Purpose | LLM 기반 Web QA Test Case Generation 연구를 위한 Controlled Web Application |
+| Primary Purpose | 기능적 복잡도(상태 의존성 × 페이지 간 상호작용)가 LLM 생성 E2E 테스트의 결함 탐지에 미치는 영향을 검증하기 위한 Controlled Web Application |
+| Experiment Protocol | `docs/research/PROTOCOL.md` |
 | Frontend | React + TypeScript + Vite |
 | Backend | Node.js + Express + TypeScript |
 | Database | SQLite |
@@ -689,14 +690,18 @@ Coverage / Quality Evaluation
 ```text
 REQ-ID
   ↓
-Human Test Case ID
+Test Goal ID (G1–G5, 네 변형 공통)
   ↓
-LLM Test Case ID
+Scenario ID (Goal × Variant A–D)
   ↓
-Execution Result
+LLM Suite ID (Scenario × 반복)
   ↓
-Defect ID
+Fault ID (F1–F7)
+  ↓
+Execution Result / Label
 ```
+
+v1.0의 Human Test Case ID 단계는 v2.0에서 **결함별 기준 테스트(reference test)**로 역할이 바뀌었다 (15장 참조).
 
 ---
 
@@ -751,26 +756,30 @@ REQ-FILTER-003
 
 StudyFlow는 각 요구사항을 테스트 및 결함과 연결할 수 있도록 설계한다.
 
-## 15.1 Requirement
+## 15.1 Requirement → Test Goal
 
 ```text
-REQ-TASK-001
+REQ-STATUS-001  →  G2 (과제 완료 처리)
 ```
+
+테스트 목표는 네 앱 변형(A–D)에서 동일하다 (`research/design/conditions.md`).
 
 ↓
 
-## 15.2 Human Test Case
+## 15.2 Scenario (Goal × Variant)
 
 ```text
-HTC-TASK-001
+G2-B   (research/scenarios/G2-B.json)
 ```
+
+시나리오에는 사용자가 관찰 가능한 기대 동작만 기술하며, 변형 ID와 결함 정보는 포함하지 않는다.
 
 ↓
 
-## 15.3 LLM Test Case
+## 15.3 LLM Suite
 
 ```text
-LTC-TASK-001
+G2-B_r1  (생성 반복 1, research/llm-results/runs/<run_id>/)
 ```
 
 ↓
@@ -778,29 +787,30 @@ LTC-TASK-001
 ## 15.4 Fault
 
 ```text
-F-001
+F1  (research/faults/catalog.yaml)
 ```
+
+각 결함에는 사람이 작성한 **기준 테스트(reference test)**를 두어, 결함이 관찰 가능함을 사전에 확인한다 (`research/test-cases/`).
 
 ↓
 
-## 15.5 Execution
+## 15.5 Execution Label
 
 ```text
-PASS / FAIL
+detected / missed / no_opportunity / oracle_error / execution_failure / environment_error / flaky
 ```
 
 ↓
 
 ## 15.6 Evaluation
 
-다음 지표를 계산한다.
+다음 지표를 계산한다 (정의와 계산은 `docs/research/PROTOCOL.md` §6, §8).
 
-- Requirement Coverage
-- Test Case Coverage
-- Defect Detection Rate
-- Test Case Redundancy
-- Test Generation Time
-- Test Execution Pass Rate
+- Fault Detection Rate (주분석 결과변수)
+- 실패 유형 분포: 미탐지(missed / no_opportunity), 오라클 오류, 실행 실패
+- 수정 노력: 수정 횟수, 토큰 사용량
+- 오라클 약화: 수정 전후 assertion 개수 변화
+- 결함 1건당 탐지 비용 (토큰)
 
 ---
 
@@ -897,30 +907,34 @@ StudyFlow의 기능 구현은 단순히 실제 서비스를 만드는 것을 목
 2. 모든 Requirement는 검증 가능한 Expected Result를 가진다.
 3. 모든 주요 Requirement는 테스트 케이스로 변환 가능해야 한다.
 4. 일부 요구사항은 의도적으로 결함을 주입하여 Fault Detection 실험에 사용한다.
-5. 동일한 Requirement를 대상으로 Human Test Case와 LLM Test Case를 비교한다.
-6. 테스트 실행 결과는 정량적인 평가 데이터로 저장한다.
-7. 애플리케이션 버전, 요구사항 버전, 테스트 케이스 버전 및 Fault 버전을 기록한다.
+5. 핵심 기능과 테스트 목표는 네 앱 변형(A–D)에서 동일하게 유지하고, 상태 반영 범위와 페이지 간 데이터 흐름만 변형에 따라 달리한다.
+6. 결함과 변형은 환경변수 스위치(`STUDYFLOW_VARIANT`, `STUDYFLOW_FAULT`)로 전환하며, 결함 코드 도달을 기록한다.
+7. 결함 정보·변형 ID·연구용 API는 LLM에 제공되는 어떤 입력에도 노출하지 않는다.
+8. 테스트 실행 결과는 정량적인 평가 데이터로 저장한다.
+9. 애플리케이션 버전(git commit), 요구사항 버전, 프롬프트 버전, 모델 버전 및 Fault 버전을 기록한다.
 
 최종적으로 다음의 연구 데이터 구조를 구축한다.
 
 ```text
 Requirement
     │
-    ├── Human Test Cases
-    │
-    ├── LLM Test Cases
-    │
-    └── Injected Faults
+    └── Test Goal (G1–G5)
              │
-             ↓
-       Playwright Execution
-             │
-             ↓
-       Evaluation Dataset
-             │
-             ├── Coverage
-             ├── Defect Detection
-             ├── Redundancy
-             ├── Generation Time
-             └── Execution Result
+             ├── × Variant A / B / C / D  →  Scenario
+             │                                  │
+             │                         LLM Suites (× 3 반복)
+             │                                  │
+             └── Injected Faults (F1–F7) ───────┤
+                  + Reference Tests             │
+                                                ↓
+                                     Playwright Execution
+                                     (+ fault reach markers)
+                                                │
+                                                ↓
+                                        Evaluation Dataset
+                                                │
+                                                ├── Fault Detection (detected / missed / no_opportunity)
+                                                ├── Oracle Error / Execution Failure / Flaky
+                                                ├── Repair Effort & Token Cost
+                                                └── DOM Covariates
 ```

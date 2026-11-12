@@ -1,0 +1,99 @@
+# Fault catalog (연구계획서 Tab 10 기반) — v0.1 초안, PROTOCOL.md §7
+#
+# - id: 코드에서 isFaultActive("F1") / markFaultReached("F1", "<where>") 로 사용
+# - factor: 대응 요인 (state | page | both | common)
+# - applicable_variants: 이 결함이 의미 있게 존재하는 앱 변형 (초안, 구현하며 확정)
+# - primary_analysis: true = 4변형 공통 → H1–H3 주분석에 사용 (조건과 결함유형의 교락 방지)
+# - goal / requirement_ids: 탐지 기회를 제공하는 테스트 목표 (research/design/conditions.md)
+# - layer / reach_marker: 결함 코드 위치와 도달 기록 지점 (구현 시 채움)
+# - reference_test: 사람이 작성한 기준 테스트 경로 — 이 테스트가 결함을 잡지 못하면 본 실험에서 제외
+#
+# 이 파일은 LLM 입력에 절대 포함하지 않는다.
+
+faults:
+  - id: F1
+    name: 상태 갱신 누락
+    example: 완료 처리 후 UI 배지(완료 개수 등)가 갱신되지 않음
+    factor: state
+    applicable_variants: [B, D]
+    primary_analysis: false
+    goal: G2
+    requirement_ids: [REQ-STATUS-001, REQ-NFR-001]
+    layer: frontend
+    reach_marker: null
+    reference_test: null
+
+  - id: F2
+    name: 필터 조건 반전
+    example: '완료' 필터가 미완료 과제를 표시
+    factor: state
+    applicable_variants: [A, B, C, D]
+    primary_analysis: true
+    goal: G3
+    requirement_ids: [REQ-FILTER-002]
+    layer: backend
+    reach_marker: null
+    reference_test: null
+
+  - id: F3
+    name: 페이지 간 전파 누락
+    example: 상세 페이지에서 수정한 내용이 목록/요약 페이지에 반영되지 않음
+    factor: page
+    applicable_variants: [C, D]
+    primary_analysis: false
+    goal: G4
+    requirement_ids: [REQ-TASK-004, REQ-NFR-001]
+    layer: frontend
+    reach_marker: null
+    reference_test: null
+
+  - id: F4
+    name: 집계 오류
+    example: 대시보드 완료 개수가 증가하지 않거나 잘못 계산됨
+    factor: both
+    applicable_variants: [D]
+    primary_analysis: false
+    goal: G5
+    requirement_ids: [REQ-DASH-001]
+    layer: backend
+    reach_marker: null
+    reference_test: null
+
+  - id: F5
+    name: 비동기 갱신 오류
+    example: API 응답 후 화면이 이전 상태로 되돌아감
+    factor: common
+    applicable_variants: [A, B, C, D]
+    primary_analysis: true
+    goal: G2
+    requirement_ids: [REQ-STATUS-001]
+    layer: frontend
+    reach_marker: null
+    reference_test: null
+
+  - id: F6
+    name: 입력 검증 누락
+    example: 제목이 빈 과제가 생성됨
+    factor: common
+    applicable_variants: [A, B, C, D]
+    primary_analysis: true
+    goal: G1
+    requirement_ids: [REQ-TASK-001, REQ-TASK-006]
+    layer: backend
+    reach_marker: null
+    reference_test: null
+
+  - id: F7
+    name: 정렬 오류
+    example: 생성일 기준 정렬이 반대로 동작
+    factor: common
+    applicable_variants: [A, B, C, D]
+    primary_analysis: true
+    goal: G5
+    requirement_ids: [REQ-TASK-002]
+    layer: backend
+    reach_marker: null
+    reference_test: null
+
+# 유효 결함 조건 (모두 만족해야 본 실험 포함):
+#   정상 앱에서 미발생 · UI/API로 관찰 가능 · 테스트 목표가 탐지 기회를 가짐 · 환경 오류와 구분 · 단일 변이 적용
