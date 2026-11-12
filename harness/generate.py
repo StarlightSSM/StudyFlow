@@ -130,6 +130,8 @@ def main() -> None:
     ap.add_argument("--min-interval", type=float, default=6.0, help="seconds between LLM calls (free-tier RPM)")
     ap.add_argument("--run-id", default=None)
     ap.add_argument("--note", default="", help="free-text note stored in run.json")
+    ap.add_argument("--no-reset", action="store_true",
+                    help="do not reset the DB to seed data before each execution (only for apps without the research API)")
     args = ap.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -137,6 +139,35 @@ def main() -> None:
         raise SystemExit(f"app not reachable at {args.base_url} - start it first (frontend: npm run dev)")
 
     scenarios = [json.loads(Path(p).read_text(encoding="utf-8")) for p in args.scenario]
+
+    # --- preflight guards (PROTOCOL.md §5): Stage 1 must run on the fault-free app of the right variant
+    api = args.api_url.rstrip("/") + "/api/__research"
+    research_info = http_json(api + "/info")
+    if research_info is None and not args.no_reset:
+        raise SystemExit("research API not reachable - start the backend with STUDYFLOW_RESEARCH_API=1 "
+                         "(or pass --no-reset for apps without it)")
+    if research_info and research_info.get("fault"):
+        raise SystemExit(f"backend runs with fault {research_info['fault']} - Stage 1 (generation) must use the "
+                         "fault-free app. Restart backend AND frontend with STUDYFLOW_FAULT/VITE_STUDYFLOW_FAULT=none.")
+    if research_info:
+        wrong = [s["scenario_id"] for s in scenarios
+                 if s.get("variant") and s["variant"] != research_info.get("variant")]
+        if wrong:
+            raise SystemExit(f"scenario variant does not match running app (variant {research_info.get('variant')}): "
+                             f"{wrong}. Run one variant at a time.")
+
+    def reset_app() -> None:
+        if args.no_reset:
+            return
+        req = urllib.request.Request(api + "/reset", method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:  # noqa: S310 - local URL
+                if r.status != 204:
+                    raise SystemExit(f"DB reset failed: HTTP {r.status}")
+        except SystemExit:
+            raise
+        except Exception as e:  # noqa: BLE001
+            raise SystemExit(f"DB reset failed: {e}")
     gen_tpl = (PROMPTS / "generate_v1.md").read_text(encoding="utf-8")
     rep_tpl = (PROMPTS / "repair_v1.md").read_text(encoding="utf-8")
 
@@ -156,7 +187,8 @@ def main() -> None:
         "app": {
             "git_commit": cmd_out(["git", "rev-parse", "HEAD"], ROOT),
             "git_dirty": bool(cmd_out(["git", "status", "--porcelain", "--", "frontend", "backend"], ROOT)),
-            "research_info": http_json(args.api_url.rstrip("/") + "/api/__research/info"),
+            "research_info": research_info,
+            "db_reset_before_each_execution": not args.no_reset,
         },
         "versions": {
             "python": platform.python_version(), "node": cmd_out(["node", "-v"]),
@@ -198,6 +230,7 @@ def main() -> None:
     for sc in scenarios:
         sid = sc["scenario_id"]
         start_url = args.base_url.rstrip("/") + sc.get("start_path", "/")
+        reset_app()
         snap = take_snapshot(start_url)
         (run_dir / "snapshots" / f"{sid}.json").write_text(json.dumps(snap, ensure_ascii=False, indent=2),
                                                          encoding="utf-8")
@@ -239,6 +272,7 @@ def main() -> None:
                     name = f"{suite_id}_s{step}.spec.ts"
                     (run_dir / "specs" / name).write_text(code, encoding="utf-8")
                     shutil.copyfile(run_dir / "specs" / name, TESTS / exec_dir_rel / name)
+                    reset_app()
                     pw = run_playwright(TESTS, f"{exec_dir_rel}/{name}", args.base_url,
                                         run_dir / "pw-artifacts" / f"{suite_id}_s{step}")
                     verdict = classify(pw)
@@ -263,6 +297,7 @@ def main() -> None:
             if final.get("label") == "valid" and args.flaky_reruns > 0:
                 name = f"{suite_id}_s{history[-1]['step']}.spec.ts"
                 for k in range(1, args.flaky_reruns + 1):
+                    reset_app()
                     pw = run_playwright(TESTS, f"{exec_dir_rel}/{name}", args.base_url,
                                         run_dir / "pw-artifacts" / f"{suite_id}_rerun{k}")
                     v = classify(pw)
